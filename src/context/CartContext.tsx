@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem, Product, LicenseType, Coupon } from '../types';
-import { INITIAL_PRODUCTS, INITIAL_COUPONS } from '../data/initialData';
 import { api } from '../services/api';
 
 interface CartContextType {
@@ -33,27 +32,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // ignore
       }
     }
-    // Default matching screenshot: 3 items
-    return [
-      {
-        product: INITIAL_PRODUCTS[0], // Gestion de stock Pro
-        licenseType: 'annual',
-        price: 50000,
-        quantity: 1
-      },
-      {
-        product: INITIAL_PRODUCTS[1], // Comptabilité Facile
-        licenseType: 'monthly',
-        price: 20000,
-        quantity: 1
-      },
-      {
-        product: INITIAL_PRODUCTS[2], // CRM Entreprise
-        licenseType: 'annual',
-        price: 75000,
-        quantity: 1
-      }
-    ];
+    return [];
   });
 
   const [coupon, setCoupon] = useState<Coupon | null>(() => {
@@ -61,8 +40,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (saved) {
       try { return JSON.parse(saved); } catch { return null; }
     }
-    // Default BIENVENUE5000 gives -5 000 FCFA discount matching screenshot
-    return INITIAL_COUPONS[1];
+    return null;
   });
 
   const [couponError, setCouponError] = useState<string | null>(null);

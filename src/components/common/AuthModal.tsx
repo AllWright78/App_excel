@@ -38,7 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   }, [authModalMode]);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginEmail, setLoginEmail] = useState('a@gmail.com');
   const [loginPassword, setLoginPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 

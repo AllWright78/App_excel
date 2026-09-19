@@ -23,35 +23,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'notif-1',
-      title: 'Alerte d’expiration de licence',
-      message: 'Votre licence pour "CRM Entreprise" expire dans 14 jours. Pensez à la renouveler.',
-      type: 'warning',
-      timestamp: 'Il y a 2 heures',
-      read: false,
-      actionUrl: '#/dashboard'
-    },
-    {
-      id: 'notif-2',
-      title: 'Commande confirmée et livrée',
-      message: 'Votre commande CMD-2025-001 a été traitée. Clé de licence active.',
-      type: 'success',
-      timestamp: 'Hier à 16:40',
-      read: false,
-      actionUrl: '#/dashboard'
-    },
-    {
-      id: 'notif-3',
-      title: 'Mise à jour disponible v2.1.0',
-      message: 'Une nouvelle version de Gestion de stock Pro est disponible au téléchargement.',
-      type: 'info',
-      timestamp: 'Il y a 3 jours',
-      read: true,
-      actionUrl: '#/dashboard'
-    }
-  ]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const [toasts, setToasts] = useState<{ id: string; title: string; message: string; type: string }[]>([]);
 

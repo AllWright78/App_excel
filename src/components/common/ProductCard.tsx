@@ -3,6 +3,7 @@ import { Product } from '../../types';
 import { Star, Heart, FileSpreadsheet, ShieldCheck, Play, Eye } from 'lucide-react';
 import { api } from '../../services/api';
 import { useNotifications } from '../../context/NotificationContext';
+import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onOpenVideo }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { addToast } = useNotifications();
+  const { addToCart } = useCart();
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,6 +33,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onO
     } else {
       onSelect(product);
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const licenseType = product.defaultLicense || 'annual';
+    addToCart(product, licenseType);
+    addToast(
+      'Ajouté au panier',
+      `${product.name} a été ajouté au panier.`,
+      'success'
+    );
   };
 
   // Determine license badge text
@@ -146,11 +159,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onO
             </button>
             <button
               type="button"
-              onClick={() => onSelect(product)}
+              onClick={handleAddToCart}
               className="py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-1.5"
             >
-              <Eye className="w-3.5 h-3.5" />
               <span>Commander</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelect(product)}
+              className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5"
+            >
+              <Eye className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Voir les détails</span>
             </button>
           </div>
         </div>

@@ -32,10 +32,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
 
   const [mode, setMode] = useState<'login' | 'register'>(authModalMode || 'login');
 
-  // Keep synced if context mode changes
+  // Keep the visible form synchronized with the button that opened the modal.
   React.useEffect(() => {
-    if (authModalMode) setMode(authModalMode);
-  }, [authModalMode]);
+    if (!isAuthModalOpen) return;
+    setMode(authModalMode);
+    if (authModalMode === 'login') {
+      setLoginEmail('a@gmail.com');
+    }
+  }, [authModalMode, isAuthModalOpen]);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('a@gmail.com');

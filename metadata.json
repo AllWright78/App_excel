@@ -1,0 +1,6 @@
+{
+  "name": "APP EXCEL",
+  "description": "Marketplace professionnelle de logiciels, applications Excel, tableaux de bord et solutions numériques pour entreprises, commerces et professionnels.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

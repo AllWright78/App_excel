@@ -135,7 +135,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
               </div>
 
               {/* Quick Trust Highlights */}
-              <div className="pt-4 flex items-center gap-6 text-xs text-slate-500 font-medium">
+              <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>Livraison numérique instantanée par email</span>

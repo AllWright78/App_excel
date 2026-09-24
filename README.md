@@ -93,3 +93,16 @@ recommandées sont `POST /payments/flooz`, `POST /payments/tmoney` et
 `GET /payments/:provider/:transactionId`. Le backend doit vérifier le montant,
 le numéro marchand `91599578`, la signature de l’opérateur et le statut réel
 avant de confirmer une commande.
+
+## Synchronisation temps réel Firestore
+
+Les applications et catégories sont lues depuis Firestore quand les variables
+`VITE_FIREBASE_*` sont présentes. Les pages d’accueil, marketplace et administration
+écoutent les collections `products` et `categories` avec `onSnapshot` : une création,
+modification ou suppression faite par un administrateur est donc répercutée sans
+nouveau déploiement.
+
+Déployez les règles de [firestore.rules](./firestore.rules) dans Firebase Console
+ou avec Firebase CLI. Dans Netlify, ajoutez toutes les variables `VITE_FIREBASE_*`
+dans l’environnement de production, puis relancez un déploiement. Les variables
+Firebase doivent être configurées avant le déploiement pour activer la synchronisation.

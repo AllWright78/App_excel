@@ -78,6 +78,40 @@ export async function registerWithFirebase(data: {
   return user;
 }
 
+export async function createManagedUserWithFirebase(data: {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  companyName?: string;
+  role: Role;
+}): Promise<User> {
+  if (!firebaseApp || !firestore) {
+    throw new Error('Firebase n’est pas configuré.');
+  }
+
+  const managedApp = initializeApp(firebaseConfig, `managed-user-${Date.now()}`);
+  const managedAuth = getAuth(managedApp);
+  try {
+    const credentials = await createUserWithEmailAndPassword(
+      managedAuth,
+      data.email.trim().toLowerCase(),
+      data.password
+    );
+    await sendEmailVerification(credentials.user);
+    const user = toAppUser(credentials.user, {
+      name: data.name,
+      phone: data.phone,
+      companyName: data.companyName,
+      role: data.role
+    });
+    await setDoc(doc(firestore, 'users', credentials.user.uid), user);
+    return user;
+  } finally {
+    await signOut(managedAuth);
+  }
+}
+
 export async function loginWithFirebase(email: string, password: string): Promise<User> {
   const { auth, db } = requireFirebase();
   const credentials = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);

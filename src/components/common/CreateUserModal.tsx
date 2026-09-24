@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../../types';
 import { api } from '../../services/api';
+import { createManagedUserWithFirebase, isFirebaseConfigured } from '../../services/firebase';
 import { useNotifications } from '../../context/NotificationContext';
 import {
   X,
@@ -50,19 +51,31 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const newUser = await api.createUser({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: password.trim(),
-        role,
-        phone: phone.trim() || undefined,
-        company: company.trim() || undefined,
-        commissionRate: role === 'vendeur' ? commissionRate : undefined
-      });
+      const normalizedRole = role === 'vendeur' ? 'seller' : role;
+      const newUser = isFirebaseConfigured
+        ? await createManagedUserWithFirebase({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password: password.trim(),
+            role: normalizedRole,
+            phone: phone.trim() || undefined,
+            companyName: company.trim() || undefined
+          })
+        : await api.createUser({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password: password.trim(),
+            role,
+            phone: phone.trim() || undefined,
+            company: company.trim() || undefined,
+            commissionRate: role === 'vendeur' ? commissionRate : undefined
+          });
 
       addToast(
         'Compte créé avec succès !',
-        `L'utilisateur ${newUser.name} a été enregistré avec le rôle ${role.toUpperCase()}.`,
+        isFirebaseConfigured
+          ? `Le compte ${newUser.name} a été créé. Un email de vérification lui a été envoyé.`
+          : `L'utilisateur ${newUser.name} a été enregistré avec le rôle ${role.toUpperCase()}.`,
         'success'
       );
 

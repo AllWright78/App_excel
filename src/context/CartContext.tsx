@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { CartItem, Product, LicenseType, Coupon } from '../types';
 import { api } from '../services/api';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -22,40 +23,52 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with the sample cart matching the user's mockup image if empty
-  const [items, setItems] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('app_excel_cart');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // ignore
-      }
-    }
-    return [];
-  });
-
-  const [coupon, setCoupon] = useState<Coupon | null>(() => {
-    const saved = localStorage.getItem('app_excel_cart_coupon');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { return null; }
-    }
-    return null;
-  });
-
+  const { user } = useAuth();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const loadedCartUserId = useRef<string | null | undefined>(undefined);
+
+  const cartStorageKey = user ? `app_excel_cart_${user.id}` : null;
+  const couponStorageKey = user ? `app_excel_cart_coupon_${user.id}` : null;
 
   useEffect(() => {
-    localStorage.setItem('app_excel_cart', JSON.stringify(items));
-  }, [items]);
+    if (loadedCartUserId.current === user?.id) return;
 
-  useEffect(() => {
-    if (coupon) {
-      localStorage.setItem('app_excel_cart_coupon', JSON.stringify(coupon));
-    } else {
-      localStorage.removeItem('app_excel_cart_coupon');
+    if (!user) {
+      setItems([]);
+      setCoupon(null);
+      setCouponError(null);
+      loadedCartUserId.current = null;
+      return;
     }
-  }, [coupon]);
+
+    const savedItems = cartStorageKey ? localStorage.getItem(cartStorageKey) : null;
+    const savedCoupon = couponStorageKey ? localStorage.getItem(couponStorageKey) : null;
+    try {
+      setItems(savedItems ? JSON.parse(savedItems) as CartItem[] : []);
+      setCoupon(savedCoupon ? JSON.parse(savedCoupon) as Coupon : null);
+    } catch {
+      setItems([]);
+      setCoupon(null);
+    }
+    setCouponError(null);
+    loadedCartUserId.current = user.id;
+  }, [user, cartStorageKey, couponStorageKey]);
+
+  useEffect(() => {
+    if (!user || loadedCartUserId.current !== user.id || !cartStorageKey) return;
+    localStorage.setItem(cartStorageKey, JSON.stringify(items));
+  }, [items, user, cartStorageKey]);
+
+  useEffect(() => {
+    if (!user || loadedCartUserId.current !== user.id || !couponStorageKey) return;
+    if (coupon) {
+      localStorage.setItem(couponStorageKey, JSON.stringify(coupon));
+    } else {
+      localStorage.removeItem(couponStorageKey);
+    }
+  }, [coupon, user, couponStorageKey]);
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

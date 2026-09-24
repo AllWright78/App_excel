@@ -25,6 +25,8 @@ import {
   Radio
 } from 'lucide-react';
 
+const ADMIN_MOBILE_NUMBER = '91 59 95 78';
+
 interface CheckoutPageProps {
   navigate: (route: string, param?: string) => void;
   onOrderCompleted?: (order: Order) => void;
@@ -57,6 +59,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
 
   const [processing, setProcessing] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const [mobilePaymentOpen, setMobilePaymentOpen] = useState(false);
+  const [mobilePaymentConfirmed, setMobilePaymentConfirmed] = useState(false);
+
+  const launchMobileMoneyMenu = () => {
+    const ussdCode = paymentMethod === 'flooz' ? '*155#' : '*145#';
+    window.location.href = `tel:${encodeURIComponent(ussdCode)}`;
+  };
 
   React.useEffect(() => {
     if (user) {
@@ -97,6 +106,12 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
 
     if (!acceptTerms) {
       addToast('Attention', 'Veuillez accepter les Conditions Générales de Vente pour continuer.', 'warning');
+      return;
+    }
+
+    if ((paymentMethod === 'flooz' || paymentMethod === 'tmoney') && !mobilePaymentConfirmed) {
+      setMobilePaymentOpen(true);
+      launchMobileMoneyMenu();
       return;
     }
 
@@ -155,7 +170,10 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
         paymentDetails: {
           ...paymentRequest.paymentDetails,
           providerName: gateway.providerName,
-          ussdPrompt: paymentResult.ussdPrompt
+          ussdPrompt: paymentResult.ussdPrompt,
+          recipientName: 'GESTE APP',
+          recipientMobileNumber: ADMIN_MOBILE_NUMBER.replace(/\s/g, ''),
+          paymentInstruction: `Transfert mobile money vers ${ADMIN_MOBILE_NUMBER}`
         },
         gatewayResponse: paymentResult.gatewayResponse
       });
@@ -195,11 +213,22 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
         `Transaction enregistrée (${recordedTx.transactionReference}). Commande confirmée et licences activées.`,
         'success'
       );
+      setMobilePaymentConfirmed(false);
     } catch (err: any) {
       addToast('Erreur de paiement', err.message || 'Une erreur est survenue lors du paiement.', 'error');
     } finally {
       setProcessing(false);
     }
+  };
+
+  const confirmMobilePayment = () => {
+    setMobilePaymentOpen(false);
+    setMobilePaymentConfirmed(true);
+    addToast(
+      'Paiement mobile confirmé',
+      'La commande va maintenant être enregistrée après vérification de la transaction.',
+      'info'
+    );
   };
 
   // SUCCESS VIEW: After Order Completed
@@ -313,6 +342,50 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {mobilePaymentOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">Valider le paiement mobile</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Le menu {paymentMethod === 'flooz' ? 'Flooz (*155#)' : 'TMoney (*145#)'} doit s’ouvrir sur votre téléphone.
+                </p>
+              </div>
+              <button type="button" onClick={() => setMobilePaymentOpen(false)} className="text-slate-500 hover:text-slate-900">
+                <ArrowLeft className="w-5 h-5 rotate-45" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 space-y-2 text-sm">
+              <p className="text-xs text-emerald-800 font-semibold">Envoyer exactement</p>
+              <p className="text-2xl font-extrabold text-emerald-700">{api.formatCurrency(total)}</p>
+              <p className="text-xs text-slate-700">
+                Destinataire : <strong>GESTE APP</strong> · <strong>{ADMIN_MOBILE_NUMBER}</strong>
+              </p>
+            </div>
+
+            <ol className="list-decimal list-inside space-y-2 text-xs text-slate-600">
+              <li>Ouvrez le menu {paymentMethod === 'flooz' ? 'Flooz' : 'TMoney'} sur votre téléphone.</li>
+              <li>Choisissez « Transfert » et indiquez le numéro <strong>{ADMIN_MOBILE_NUMBER}</strong>.</li>
+              <li>Indiquez le montant, puis saisissez votre code personnel.</li>
+              <li>Revenez ici après le SMS de confirmation.</li>
+            </ol>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button type="button" onClick={launchMobileMoneyMenu} className="flex-1 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+                Ouvrir le téléphone
+              </button>
+              <button type="button" onClick={confirmMobilePayment} className="flex-1 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+                J’ai validé le paiement
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400 text-center">
+              Ne partagez jamais votre code personnel avec GESTE APP.
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Header */}
       <div className="flex items-center gap-3">

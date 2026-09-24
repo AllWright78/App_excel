@@ -40,7 +40,6 @@ export const LicenseVerifierPage: React.FC = () => {
   };
 
   const vbaSnippet = `' =========================================================================
-' MODULE VBA GESTE APP : Module_LicenseActivation.bas
 ' À intégrer dans ThisWorkbook ou dans un module standard pour protéger
 ' automatiquement votre classeur Excel.
 ' =========================================================================
@@ -92,10 +91,8 @@ Sub Workbook_Open()
     cleEnregistree = ThisWorkbook.Sheets("Config").Range("B2").Value
     
     If Not VerifierLicenceExcel(cleEnregistree) Then
-        MsgBox         "ERREUR DE LICENCE GESTE APP :" & vbCrLf & _
                "Votre clé d'activation est invalide ou expirée." & vbCrLf & _
                "Veuillez vous rendre sur https://appexcel.tg pour renouveler.", _
-               vbCritical, "Protection GESTE APP"
         ThisWorkbook.Close SaveChanges:=False
     End If
 End Sub`;
@@ -203,8 +200,8 @@ End Sub`;
           {/* Verification Result Output */}
           {verificationResult && (
             <div className={`p-4 rounded-xl border space-y-2 ${verificationResult.valid
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                : 'bg-rose-50 border-rose-300 text-rose-900'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+              : 'bg-rose-50 border-rose-300 text-rose-900'
               }`}>
               <div className="flex items-center gap-2 font-bold text-sm">
                 {verificationResult.valid ? (
@@ -245,7 +242,6 @@ End Sub`;
           </div>
 
           <p className="text-xs text-slate-400 leading-relaxed">
-            Intégrez ce module dans vos classeurs Excel <code>.xlsm</code> pour communiquer avec l'API GESTE APP. À chaque ouverture du fichier, le script valide silencieusement l'état de la licence.
           </p>
 
           <pre className="bg-slate-950 p-4 rounded-xl text-[11px] font-mono text-emerald-300 overflow-x-auto max-h-[380px] border border-slate-800 leading-relaxed">

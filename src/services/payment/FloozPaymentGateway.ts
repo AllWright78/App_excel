@@ -8,6 +8,20 @@ export class FloozPaymentGateway implements PaymentGateway {
   readonly providerName = 'Flooz (Moov Africa)';
 
   async processPayment(request: PaymentRequest): Promise<PaymentResult> {
+    const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    if (apiUrl) {
+      const response = await fetch(`${apiUrl}/payments/flooz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || 'Le backend Flooz a refusé la demande.');
+      }
+      return result as PaymentResult;
+    }
+
     const rawPhone = (request.paymentDetails.phoneNumber || request.customer.phone || '').replace(/[\s\-\+]/g, '');
     
     // Togo Moov Africa prefixes typically start with 96, 97, 98, 99 or +228

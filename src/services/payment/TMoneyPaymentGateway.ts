@@ -8,6 +8,20 @@ export class TMoneyPaymentGateway implements PaymentGateway {
   readonly providerName = 'TMoney (Togocom)';
 
   async processPayment(request: PaymentRequest): Promise<PaymentResult> {
+    const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    if (apiUrl) {
+      const response = await fetch(`${apiUrl}/payments/tmoney`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || 'Le backend TMoney a refusé la demande.');
+      }
+      return result as PaymentResult;
+    }
+
     const rawPhone = (request.paymentDetails.phoneNumber || request.customer.phone || '').replace(/[\s\-\+]/g, '');
     const cleanPhone = rawPhone.startsWith('228') ? rawPhone.slice(3) : rawPhone;
 

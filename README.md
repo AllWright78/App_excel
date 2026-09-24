@@ -34,3 +34,43 @@ transaction enregistrée avec succès. Cette séparation permet de conserver une
 contrainte MySQL claire : transaction d’abord, commande ensuite.
 
 Sans `VITE_API_URL`, l’application utilise le stockage local uniquement pour le mode démo.
+
+## Frontend et backend séparés
+
+Lancer le frontend :
+
+```bash
+npm run dev
+```
+
+Lancer le backend dans un autre terminal :
+
+```bash
+npm run dev:backend
+```
+
+Le frontend utilise `VITE_API_URL=http://localhost:4000` pour appeler le backend.
+Le backend expose `GET /health` et les routes de paiement `POST /payments/flooz`
+et `POST /payments/tmoney`.
+
+## Configuration Flooz et TMoney
+
+Les clés et secrets Flooz/TMoney ne doivent jamais être ajoutés dans le frontend
+React ni dans une variable `VITE_*`, car ces valeurs sont visibles dans le navigateur.
+Ils doivent être configurés sur un backend sécurisé, par exemple dans les variables
+d’environnement du serveur :
+
+```env
+FLOOZ_API_URL=https://...
+FLOOZ_API_KEY=...
+FLOOZ_MERCHANT_ID=...
+TMONEY_API_URL=https://...
+TMONEY_API_KEY=...
+TMONEY_MERCHANT_ID=...
+```
+
+Le frontend utilise uniquement `VITE_API_URL` pour appeler ce backend. Les routes
+recommandées sont `POST /payments/flooz`, `POST /payments/tmoney` et
+`GET /payments/:provider/:transactionId`. Le backend doit vérifier le montant,
+le numéro marchand `91599578`, la signature de l’opérateur et le statut réel
+avant de confirmer une commande.

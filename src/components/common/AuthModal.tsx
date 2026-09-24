@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { isFirebaseConfigured } from '../../services/firebase';
 import { useNotifications } from '../../context/NotificationContext';
 import {
   X,
@@ -117,8 +118,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
       });
 
       addToast(
-        'Compte créé avec succès !',
-        `Bienvenue ${regName}, vous pouvez maintenant finaliser votre commande.`,
+        isFirebaseConfigured ? 'Vérifiez votre email' : 'Compte créé avec succès !',
+        isFirebaseConfigured
+          ? `Un lien de vérification a été envoyé à ${regEmail.trim()}. Cliquez dessus avant de vous connecter.`
+          : `Bienvenue ${regName}, vous pouvez maintenant finaliser votre commande.`,
         'success'
       );
       if (onSuccess) onSuccess();

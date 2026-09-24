@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Role } from '../types';
 import { INITIAL_USERS } from '../data/initialData';
 import { api } from '../services/api';
+import {
+  isFirebaseConfigured,
+  loginWithFirebase,
+  logoutFromFirebase,
+  registerWithFirebase,
+  updateFirebaseUser
+} from '../services/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -85,6 +92,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password?: string): Promise<{ success: boolean; message?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
+    if (isFirebaseConfigured) {
+      try {
+        const firebaseUser = await loginWithFirebase(cleanEmail, password || '');
+        setUser(firebaseUser);
+        closeAuthModal();
+        return { success: true };
+      } catch (error) {
+        return { success: false, message: error instanceof Error ? error.message : 'Connexion impossible.' };
+      }
+    }
     const allUsers = await api.getAllUsers();
     const superAdminEmails = new Set(['moumouniabdoulmalik29@gmail.com']);
 
@@ -132,6 +149,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     companyName?: string;
     role?: Role;
   }): Promise<User> => {
+    if (isFirebaseConfigured) {
+      const firebaseUser = await registerWithFirebase({
+        name: data.name,
+        email: data.email,
+        password: data.password || '',
+        phone: data.phone,
+        companyName: data.companyName,
+        role: data.role || 'client'
+      });
+      closeAuthModal();
+      return firebaseUser;
+    }
     const newUser = await api.createUser({
       name: data.name,
       email: data.email,
@@ -148,13 +177,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    if (isFirebaseConfigured) {
+      logoutFromFirebase().catch(console.error);
+    }
   };
 
   const updateUserProfile = (data: Partial<User>) => {
     if (user) {
       const updated = { ...user, ...data };
       setUser(updated);
-      api.updateUser(user.id, data).catch(console.error);
+      if (isFirebaseConfigured) {
+        updateFirebaseUser(user.id, data).catch(console.error);
+      } else {
+        api.updateUser(user.id, data).catch(console.error);
+      }
     }
   };
 

@@ -35,6 +35,25 @@ contrainte MySQL claire : transaction d’abord, commande ensuite.
 
 Sans `VITE_API_URL`, l’application utilise le stockage local uniquement pour le mode démo.
 
+## Comptes Firebase et vérification email
+
+Le projet peut utiliser Firebase Authentication et Firestore pour enregistrer les
+comptes dans une base centralisée. Lorsque les variables `VITE_FIREBASE_*` sont
+configurées, l’inscription :
+
+1. crée le compte dans Firebase Authentication ;
+2. enregistre le profil dans la collection Firestore `users` ;
+3. envoie un email de vérification ;
+4. interdit la connexion tant que l’adresse n’est pas vérifiée.
+
+Activez **Email/Password** dans Firebase Console et créez une base Firestore,
+puis ajoutez les valeurs `VITE_FIREBASE_*` dans l’environnement Netlify ou dans
+un fichier `.env` local. Ces variables sont une configuration publique Firebase ;
+les règles Firestore doivent tout de même protéger les données.
+
+Sans ces variables, le site conserve le mode local de démonstration avec
+`localStorage`.
+
 ## Frontend et backend séparés
 
 Lancer le frontend :

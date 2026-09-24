@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { api } from '../services/api';
+import { api, subscribeToProducts } from '../services/api';
 import { Product, License, User, PayoutRequest, Coupon } from '../types';
 import { CreateUserModal } from '../components/common/CreateUserModal';
 import { AddProductModal } from '../components/common/AddProductModal';
@@ -138,6 +138,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
       ]);
     }
     loadAdminData();
+    const unsubscribeProducts = subscribeToProducts(async () => {
+      const updated = await api.getProducts({ includeUnpublished: true });
+      setProducts(updated.products);
+    });
+    return unsubscribeProducts;
   }, []);
 
   const handleToggleProductStatus = async (productId: string) => {

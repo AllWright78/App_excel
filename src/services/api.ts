@@ -26,10 +26,31 @@ import {
   INITIAL_MESSAGES,
   INITIAL_TRANSACTIONS
 } from '../data/initialData';
+import {
+  deleteFirebaseDocument,
+  getFirebaseCollection,
+  isFirebaseConfigured,
+  setFirebaseDocument,
+  subscribeToFirebaseCollection
+} from './firebase';
 
 // Local storage keys for persistent client simulation
 const STORAGE_PREFIX = 'app_excel_';
 const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+export function subscribeToProducts(onChange: () => void): () => void {
+  if (!isFirebaseConfigured) return () => undefined;
+  return subscribeToFirebaseCollection<Product>('products', () => onChange(), error => {
+    console.error('Impossible de synchroniser les applications:', error);
+  });
+}
+
+export function subscribeToCategories(onChange: () => void): () => void {
+  if (!isFirebaseConfigured) return () => undefined;
+  return subscribeToFirebaseCollection<Category>('categories', () => onChange(), error => {
+    console.error('Impossible de synchroniser les catégories:', error);
+  });
+}
 
 function getStored<T>(key: string, defaultVal: T): T {
   try {
@@ -121,7 +142,14 @@ export const api = {
     sort?: string;
     includeUnpublished?: boolean;
   }): Promise<{ products: Product[]; total: number }> {
-    products = getStored('products', products);
+    if (isFirebaseConfigured) {
+      const remoteProducts = await getFirebaseCollection<Product>('products');
+      if (remoteProducts?.length) {
+        products = remoteProducts;
+      }
+    } else {
+      products = getStored('products', products);
+    }
     let result = params?.includeUnpublished
       ? [...products]
       : [...products].filter(p => p.status === 'approved');
@@ -213,11 +241,18 @@ export const api = {
 
     products.unshift(newProduct);
     setStored('products', products);
+    if (isFirebaseConfigured) {
+      await setFirebaseDocument('products', newProduct.id, newProduct);
+    }
     return newProduct;
   },
 
   // --- Categories ---
   async getCategories(): Promise<Category[]> {
+    if (isFirebaseConfigured) {
+      const remoteCategories = await getFirebaseCollection<Category>('categories');
+      if (remoteCategories?.length) return remoteCategories;
+    }
     return categories;
   },
 
@@ -656,6 +691,10 @@ export const api = {
   },
 
   async getAllUsers(): Promise<User[]> {
+    if (isFirebaseConfigured) {
+      const remoteUsers = await getFirebaseCollection<User>('users');
+      if (remoteUsers?.length) return remoteUsers;
+    }
     return users;
   },
 
@@ -719,6 +758,9 @@ export const api = {
 
     users.push(newUser);
     setStored('users', users);
+    if (isFirebaseConfigured) {
+      await setFirebaseDocument('users', newUser.id, newUser);
+    }
     return newUser;
   },
 
@@ -748,6 +790,9 @@ export const api = {
       archivedAt: normalizedData.archivedAt ?? users[idx].archivedAt ?? null
     };
     setStored('users', users);
+    if (isFirebaseConfigured) {
+      await setFirebaseDocument('users', userId, users[idx]);
+    }
     return users[idx];
   },
 
@@ -756,6 +801,9 @@ export const api = {
     if (!p) throw new Error('Produit introuvable');
     p.status = 'approved';
     setStored('products', products);
+    if (isFirebaseConfigured) {
+      await setFirebaseDocument('products', productId, p);
+    }
     return p;
   },
 
@@ -764,6 +812,9 @@ export const api = {
     if (!p) throw new Error('Produit introuvable');
     p.status = 'rejected';
     setStored('products', products);
+    if (isFirebaseConfigured) {
+      await setFirebaseDocument('products', productId, p);
+    }
     return p;
   },
 
@@ -776,6 +827,9 @@ export const api = {
 
     products = products.filter(product => product.id !== productId);
     setStored('products', products);
+    if (isFirebaseConfigured) {
+      await deleteFirebaseDocument('products', productId);
+    }
     return true;
   },
 

@@ -12,7 +12,12 @@ import {
   getFirestore,
   getDoc,
   setDoc,
-  updateDoc
+  updateDoc,
+  collection,
+  getDocs,
+  deleteDoc,
+  onSnapshot,
+  type Unsubscribe
 } from 'firebase/firestore';
 import { Role, User } from '../types';
 
@@ -32,6 +37,35 @@ const firebaseApp = isFirebaseConfigured
   : null;
 const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null;
 const firestore = firebaseApp ? getFirestore(firebaseApp) : null;
+
+export async function getFirebaseCollection<T>(name: string): Promise<T[] | null> {
+  if (!firestore) return null;
+  const snapshot = await getDocs(collection(firestore, name));
+  return snapshot.docs.map(item => item.data() as T);
+}
+
+export async function setFirebaseDocument<T extends object>(collectionName: string, id: string, data: T): Promise<void> {
+  if (!firestore) throw new Error('Firebase n’est pas configuré.');
+  await setDoc(doc(firestore, collectionName, id), data);
+}
+
+export async function deleteFirebaseDocument(collectionName: string, id: string): Promise<void> {
+  if (!firestore) throw new Error('Firebase n’est pas configuré.');
+  await deleteDoc(doc(firestore, collectionName, id));
+}
+
+export function subscribeToFirebaseCollection<T>(
+  name: string,
+  callback: (items: T[]) => void,
+  onError?: (error: Error) => void
+): Unsubscribe {
+  if (!firestore) return () => undefined;
+  return onSnapshot(
+    collection(firestore, name),
+    snapshot => callback(snapshot.docs.map(item => item.data() as T)),
+    error => onError?.(error)
+  );
+}
 
 function toAppUser(firebaseUser: FirebaseUser, profile: Partial<User> = {}): User {
   return {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product, Category, LicenseType } from '../types';
-import { api } from '../services/api';
+import { api, subscribeToCategories, subscribeToProducts } from '../services/api';
 import { ProductCard } from '../components/common/ProductCard';
 import { VideoDemoModal } from '../components/common/VideoDemoModal';
 import {
@@ -56,6 +56,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setCategories(cats);
     }
     loadCategories();
+    const unsubscribe = subscribeToCategories(loadCategories);
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -74,6 +76,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setLoading(false);
     }
     fetchProducts();
+    const unsubscribe = subscribeToProducts(fetchProducts);
+    return unsubscribe;
   }, [selectedCategory, searchQuery, selectedLicenseType, minPrice, maxPrice, sortBy]);
 
   const resetFilters = () => {

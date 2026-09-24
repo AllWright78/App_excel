@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Product, Category } from '../types';
-import { api } from '../services/api';
+import { api, subscribeToCategories, subscribeToProducts } from '../services/api';
 import { ProductCard } from '../components/common/ProductCard';
 import { VideoDemoModal } from '../components/common/VideoDemoModal';
 import {
@@ -60,6 +60,12 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       }
     }
     loadData();
+    const unsubscribeProducts = subscribeToProducts(loadData);
+    const unsubscribeCategories = subscribeToCategories(loadData);
+    return () => {
+      unsubscribeProducts();
+      unsubscribeCategories();
+    };
   }, []);
 
   const getCategoryIcon = (iconName: string) => {

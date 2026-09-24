@@ -60,7 +60,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
     async function loadAdminData() {
       const [admStats, prods, usrs, pyts] = await Promise.all([
         api.getAdminStats(),
-        api.getProducts({}),
+        api.getProducts({ includeUnpublished: true }),
         api.getAllUsers(),
         api.getSellerPayouts('user-seller')
       ]);
@@ -140,15 +140,70 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
     loadAdminData();
   }, []);
 
-  const handleToggleProductStatus = (productId: string) => {
-    setProducts(prev =>
-      prev.map(p =>
-        p.id === productId
-          ? { ...p, status: p.status === 'approved' ? 'suspended' : 'approved' }
-          : p
-      )
-    );
-    addToast('Statut mis à jour', 'La visibilité du produit a été modifiée sur la marketplace.', 'info');
+  const handleToggleProductStatus = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    try {
+      const updated = product.status === 'approved'
+        ? await api.rejectProduct(productId)
+        : await api.approveProduct(productId);
+      setProducts(prev => prev.map(p => p.id === productId ? updated : p));
+      addToast('Statut mis à jour', 'La visibilité du produit a été modifiée sur la marketplace.', 'info');
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible de modifier le statut de cette application.', 'error');
+    }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!window.confirm(`Supprimer définitivement « ${product.name} » ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      await api.deleteProduct(product.id);
+      setProducts(prev => prev.filter(item => item.id !== product.id));
+      addToast('Application supprimée', 'L’application a été supprimée définitivement du catalogue.', 'success');
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible de supprimer cette application.', 'error');
+    }
+  };
+
+  const handleUpdateUserRole = async (userId: string, nextRole: 'admin' | 'seller' | 'client') => {
+    try {
+      const updated = await api.updateUser(userId, {
+        role: nextRole,
+        sellerStatus: nextRole === 'seller' ? 'approved' : undefined
+      });
+      setUsers(prev => prev.map(u => u.id === userId ? updated : u));
+      addToast('Rôle modifié', `${updated.name} est maintenant ${nextRole === 'seller' ? 'Vendeur' : nextRole === 'admin' ? 'Administrateur' : 'Client'}.`, 'success');
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible de modifier ce rôle.', 'error');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await api.deleteUser(userId);
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      addToast('Compte supprimé', 'Le compte a été retiré de la plateforme.', 'info');
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible de supprimer ce compte.', 'error');
+    }
+  };
+
+  const handleToggleArchiveUser = async (userId: string, currentArchived: boolean) => {
+    try {
+      const updated = await api.archiveUser(userId, !currentArchived);
+      setUsers(prev => prev.map(u => u.id === userId ? updated : u));
+      addToast(
+        currentArchived ? 'Compte restauré' : 'Compte archivé',
+        currentArchived ? `${updated.name} a été réactivé.` : `${updated.name} a été archivé et ne peut plus se connecter.`,
+        currentArchived ? 'success' : 'warning'
+      );
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible d’archiver ce compte.', 'error');
+    }
   };
 
   const handleApprovePayout = (payoutId: string) => {
@@ -205,7 +260,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-extrabold text-white">
-                Super Administration APP EXCEL
+                Super Administration GESTE APP
               </h1>
               <span className="bg-purple-500/30 text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-400/40">
                 Accès Super Root
@@ -390,6 +445,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
                         }`}
                       >
                         {prod.status === 'approved' ? 'Suspendre' : 'Approuver'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(prod)}
+                        className="ml-2 inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Supprimer
                       </button>
                     </td>
                   </tr>
@@ -702,20 +764,24 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
                           : 'Acheteur'}
                       </td>
                       <td className="p-4">
-                        <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Actif</span>
-                        </span>
+                        {u.isArchived ? (
+                          <span className="text-rose-600 font-semibold flex items-center gap-1">
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Archivé</span>
+                          </span>
+                        ) : (
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Actif</span>
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 text-right">
                         {!isSuperAdmin ? (
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
                             {u.role === 'client' && (
                               <button
-                                onClick={() => {
-                                  setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, role: 'seller' } : usr));
-                                  addToast('Rôle modifié', `${u.name} est maintenant Vendeur.`, 'success');
-                                }}
+                                onClick={() => handleUpdateUserRole(u.id, 'seller')}
                                 className="text-[11px] font-semibold text-emerald-700 hover:underline"
                               >
                                 Passer Vendeur
@@ -723,20 +789,29 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
                             )}
                             {u.role === 'seller' && (
                               <button
-                                onClick={() => {
-                                  setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, role: 'admin' } : usr));
-                                  addToast('Rôle modifié', `${u.name} est maintenant Administrateur.`, 'success');
-                                }}
+                                onClick={() => handleUpdateUserRole(u.id, 'admin')}
                                 className="text-[11px] font-semibold text-purple-700 hover:underline"
                               >
                                 Promouvoir Admin
                               </button>
                             )}
+                            {u.role === 'admin' && (
+                              <button
+                                onClick={() => handleUpdateUserRole(u.id, 'client')}
+                                className="text-[11px] font-semibold text-slate-700 hover:underline"
+                              >
+                                Rétrograder Client
+                              </button>
+                            )}
                             <button
-                              onClick={() => {
-                                setUsers(prev => prev.filter(usr => usr.id !== u.id));
-                                addToast('Compte supprimé', `Le compte de ${u.name} a été retiré.`, 'info');
-                              }}
+                              onClick={() => handleToggleArchiveUser(u.id, Boolean(u.isArchived))}
+                              className="text-[11px] font-semibold text-amber-700 hover:underline"
+                              title={u.isArchived ? 'Restaurer l’utilisateur' : 'Archiver l’utilisateur'}
+                            >
+                              {u.isArchived ? 'Désarchiver' : 'Archiver'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(u.id)}
                               className="text-[11px] text-rose-600 hover:text-rose-800 font-medium"
                               title="Supprimer l'utilisateur"
                             >
@@ -762,7 +837,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
         onClose={() => setIsAddProductOpen(false)}
         isAdmin={true}
         onProductCreated={(newProd) => {
-          setProducts([newProd, ...products]);
+          setProducts(prev => [newProd, ...prev.filter(product => product.id !== newProd.id)]);
+          addToast(
+            'Application publiée',
+            `${newProd.name} est maintenant visible dans la boutique et sur l’accueil.`,
+            'success'
+          );
         }}
       />
 

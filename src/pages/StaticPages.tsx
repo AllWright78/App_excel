@@ -41,7 +41,7 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
 
   const handleSellerApply = (e: React.FormEvent) => {
     e.preventDefault();
-    addToast('Candidature reçue', 'Votre demande pour devenir vendeur sur APP EXCEL est en cours de validation.', 'success');
+    addToast('Candidature reçue', 'Votre demande pour devenir vendeur sur GESTE APP est en cours de validation.', 'success');
     setSellerName('');
     setSellerSpecialty('');
   };
@@ -141,7 +141,7 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         <div className="text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Programme Partenaires</span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Devenez vendeur sur APP EXCEL</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Devenez vendeur sur GESTE APP</h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
             Monétisez vos compétences Excel, développements VBA et logiciels de gestion auprès d'entreprises en Afrique et dans le monde.
           </p>
@@ -201,8 +201,9 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Contactez l’équipe APP EXCEL</h1>
-          <p className="text-sm text-slate-500 mt-1">Notre support technique basé à Lomé est disponible 7j/7 pour vous assister.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900">Contactez l’équipe GESTE APP</h1>
+          <p className="text-sm text-slate-500 mt-1">Contactez-nous pour tout ce qui concerne notre entreprise ou nos services.
+            Nous ferons de notre mieux pour vous répondre dans les plus brefs délais.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -213,7 +214,7 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-900">Adresse</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Boulevard du 13 Janvier, Lomé, Togo</p>
+                <p className="text-xs text-slate-500 mt-0.5">BAGUIDA RUE AKEREBURU</p>
               </div>
             </div>
 
@@ -223,7 +224,7 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-900">Téléphone / WhatsApp</h4>
-                <p className="text-xs text-slate-500 mt-0.5">+228 90 00 11 22 / +228 91 88 77 66</p>
+                <p className="text-xs text-slate-500 mt-0.5">+228 91 59 95 78</p>
               </div>
             </div>
 
@@ -233,7 +234,7 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-900">Email</h4>
-                <p className="text-xs text-slate-500 mt-0.5">contact@appexcel.tg / support@appexcel.tg</p>
+                <p className="text-xs text-slate-500 mt-0.5">informatiquegrace@gmail.com</p>
               </div>
             </div>
           </div>
@@ -286,18 +287,12 @@ export const StaticPages: React.FC<StaticPageProps> = ({ type, navigate, categor
       </h1>
 
       <p>
-        La marketplace APP EXCEL assure la distribution sécurisée de produits logiciels et de classeurs automatisés.
-        Toute commande passée via Flooz, TMoney, Carte Bancaire ou Espèces est régie par les présentes clauses.
-      </p>
 
-      <h3 className="text-base font-bold text-slate-800 pt-3">1. Livraison numérique et licences</h3>
-      <p>
-        Dès confirmation du paiement par les opérateurs de téléphonie ou passerelles bancaires, la clé d'activation et le lien de téléchargement sont automatiquement générés et transmis au client.
-      </p>
-
-      <h3 className="text-base font-bold text-slate-800 pt-3">2. Politique de remboursement</h3>
-      <p>
-        Conformément aux dispositions relatives aux contenus numériques personnalisés avec clé de licence active, les remboursements ne sont acceptés que si un dysfonctionnement technique avéré ne peut être résolu par le support sous 72 heures.
+        Nous somme une entreprise "GRACE INFORMATIQUE" spécialisée dans les prestations de services informatiques , nous concevons notre rôle comme celui d'un partenaire informatique chargé de trouver des solutions pratiques, adaptées aux besoins de nos clients:
+        -Solution de maintenance et réseau informatique.
+        -Formation en bureautique
+        -Solution d'affichage dynamique & Site web
+        -Développement d'application
       </p>
     </div>
   );

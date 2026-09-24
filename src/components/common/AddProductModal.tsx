@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Product, LicenseType } from '../../types';
 import { api } from '../../services/api';
 import { useNotifications } from '../../context/NotificationContext';
+import { getYoutubeEmbedUrl } from '../../utils/video';
 import { useAuth } from '../../context/AuthContext';
 import {
   X,
@@ -35,6 +36,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
   const { user } = useAuth();
   const { addToast } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -56,12 +58,15 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
     format: string;
     fileData?: string;
   } | null>(null);
+  const [applicationImage, setApplicationImage] = useState<string | null>(null);
 
   // Video Demo State
-  const [demoVideoUrl, setDemoVideoUrl] = useState(
-    'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  );
-  const [videoTitle, setVideoTitle] = useState('Démonstration complète de la solution');
+  const [demoVideos, setDemoVideos] = useState([
+    {
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      title: 'Démonstration complète de la solution'
+    }
+  ]);
   const [previewVideo, setPreviewVideo] = useState(false);
 
   // Features List
@@ -97,6 +102,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
           fileData: event.target?.result as string
         });
       };
+
       reader.readAsDataURL(file);
 
       addToast(
@@ -105,6 +111,21 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         'success'
       );
     }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const image = e.target.files?.[0];
+    if (!image) return;
+
+    if (!image.type.startsWith('image/')) {
+      addToast('Format invalide', 'Sélectionnez une image PNG, JPG, WEBP ou GIF.', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = event => setApplicationImage(event.target?.result as string);
+    reader.readAsDataURL(image);
+    addToast('Image ajoutée', 'Cette image sera utilisée pour présenter l’application.', 'success');
   };
 
   const handleAddFeature = () => {
@@ -164,17 +185,22 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         version,
         fileFormat: selectedFile?.format || '.xlsm',
         fileSize: selectedFile?.size || '4.5 Mo',
-        logo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
-        gallery: [
-          'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'
-        ],
+        logo: applicationImage || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
+        gallery: applicationImage
+          ? [applicationImage]
+          : [
+              'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+              'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'
+            ],
         sourceFileName: selectedFile?.name || 'Application_Excel.xlsm',
         sourceFileData: selectedFile?.fileData,
-        demoVideoUrl: demoVideoUrl.trim() || undefined,
-        demoVideoTitle: videoTitle.trim() || undefined,
+        demoVideoUrl: demoVideos[0]?.url.trim() || undefined,
+        demoVideoTitle: demoVideos[0]?.title.trim() || undefined,
+        demoVideos: demoVideos
+          .filter(video => video.url.trim())
+          .map(video => ({ url: video.url.trim(), title: video.title.trim() || 'Vidéo de démonstration' })),
         vendorId: user?.id || (isAdmin ? 'user-admin' : 'user-seller'),
-        vendorName: user?.companyName || user?.name || (isAdmin ? 'APP EXCEL Studio' : 'Vendeur Certifié'),
+        vendorName: user?.companyName || user?.name || (isAdmin ? 'GESTE APP Studio' : 'Vendeur Certifié'),
         vendorVerified: true,
         rating: 5.0,
         reviewsCount: 1,
@@ -302,6 +328,38 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
             </div>
           </div>
 
+          {/* 1.5 APPLICATION IMAGE */}
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <label className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+              Image de l’application <span className="text-emerald-600 font-normal">(Recommandé)</span>
+            </label>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              className="w-full rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/40 p-4 transition-colors"
+            >
+              {applicationImage ? (
+                <div className="flex items-center gap-4 text-left">
+                  <img src={applicationImage} alt="Aperçu de l’application" className="w-20 h-20 rounded-xl object-cover border border-slate-200" />
+                  <span className="text-xs font-bold text-emerald-700">Image sélectionnée · Cliquer pour la remplacer</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-slate-500">
+                  <UploadCloud className="w-6 h-6 text-emerald-600" />
+                  <span className="text-xs font-semibold">Ajouter la photo de votre application</span>
+                  <span className="text-[11px]">PNG, JPG, WEBP ou GIF</span>
+                </div>
+              )}
+            </button>
+          </div>
+
           {/* 2. DEMO VIDEO SECTION */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
@@ -318,40 +376,58 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
-                  Lien de la vidéo (YouTube, Vimeo ou MP4)
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://www.youtube.com/embed/..."
-                  value={demoVideoUrl}
-                  onChange={(e) => setDemoVideoUrl(e.target.value)}
-                  className="w-full bg-slate-50 text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-hidden"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
-                  Titre explicatif de la vidéo
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ex: Guide pratique et fonctionnalités du tableau"
-                  value={videoTitle}
-                  onChange={(e) => setVideoTitle(e.target.value)}
-                  className="w-full bg-slate-50 text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-hidden"
-                />
-              </div>
+            <div className="space-y-3">
+              {demoVideos.map((video, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl border border-slate-200 p-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Lien YouTube {index + 1}
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={video.url}
+                      onChange={(e) => setDemoVideos(prev => prev.map((item, itemIndex) => itemIndex === index ? { ...item, url: e.target.value } : item))}
+                      className="w-full bg-slate-50 text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                        Titre de la vidéo
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Présentation des fonctionnalités"
+                        value={video.title}
+                        onChange={(e) => setDemoVideos(prev => prev.map((item, itemIndex) => itemIndex === index ? { ...item, title: e.target.value } : item))}
+                        className="w-full bg-slate-50 text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-hidden"
+                      />
+                    </div>
+                    {demoVideos.length > 1 && (
+                      <button type="button" onClick={() => setDemoVideos(prev => prev.filter((_, itemIndex) => itemIndex !== index))} className="mt-5 p-2 text-rose-600 hover:bg-rose-50 rounded-lg" aria-label={`Supprimer la vidéo ${index + 1}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setDemoVideos(prev => [...prev, { url: '', title: '' }])}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800"
+              >
+                <Plus className="w-4 h-4" />
+                Ajouter une autre vidéo YouTube
+              </button>
             </div>
 
             {/* Video Live Preview Box */}
-            {previewVideo && demoVideoUrl && (
+            {previewVideo && demoVideos[0]?.url && (
               <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black aspect-video shadow-md mt-2">
                 <iframe
-                  src={demoVideoUrl}
-                  title={videoTitle}
+                  src={getYoutubeEmbedUrl(demoVideos[0].url) || undefined}
+                  title={demoVideos[0].title}
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -574,7 +650,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
               className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
             >
               <FileSpreadsheet className="w-4 h-4" />
-              <span>{isSubmitting ? 'Publication...' : 'Publier l’application sur APP EXCEL'}</span>
+              <span>{isSubmitting ? 'Publication...' : 'Publier l’application sur GESTE APP'}</span>
             </button>
           </div>
 

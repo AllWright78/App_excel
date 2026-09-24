@@ -54,7 +54,8 @@ let categories: Category[] = getStored('categories', INITIAL_CATEGORIES);
 let users: User[] = getStored('users', INITIAL_USERS);
 
 // Guarantee super admin exists with requested email and password
-const adminIdx = users.findIndex(u => u.role === 'super_admin' || u.email === 'moumouniabdoulmalik29@gmail.com');
+const SUPER_ADMIN_EMAILS = ['moumouniabdoulmalik29@gmail.com'];
+const adminIdx = users.findIndex(u => u.role === 'super_admin' || SUPER_ADMIN_EMAILS.includes(u.email));
 if (adminIdx >= 0) {
   users[adminIdx] = {
     ...users[adminIdx],
@@ -118,9 +119,12 @@ export const api = {
     minPrice?: number;
     maxPrice?: number;
     sort?: string;
+    includeUnpublished?: boolean;
   }): Promise<{ products: Product[]; total: number }> {
     products = getStored('products', products);
-    let result = [...products].filter(p => p.status === 'approved');
+    let result = params?.includeUnpublished
+      ? [...products]
+      : [...products].filter(p => p.status === 'approved');
 
     if (params?.category && params.category !== 'all') {
       result = result.filter(p => p.categoryId === params.category || p.categoryName.toLowerCase() === params.category?.toLowerCase());
@@ -161,6 +165,7 @@ export const api = {
   },
 
   async getProductByIdOrSlug(idOrSlug: string): Promise<Product | null> {
+    products = getStored('products', products);
     const p = products.find(prod => prod.id === idOrSlug || prod.slug === idOrSlug);
     return p || null;
   },
@@ -177,7 +182,7 @@ export const api = {
       categoryId: data.categoryId || 'cat-excel',
       categoryName: categories.find(c => c.id === data.categoryId)?.name || 'Excel',
       vendorId: effectiveVendor?.id || 'vendor-1',
-      vendorName: effectiveVendor?.companyName || effectiveVendor?.name || 'APP EXCEL Studio',
+      vendorName: effectiveVendor?.companyName || effectiveVendor?.name || 'GESTE APP Studio',
       vendorVerified: true,
       logo: data.logo || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
       gallery: data.gallery && data.gallery.length > 0 ? data.gallery : [data.logo || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80'],
@@ -197,6 +202,10 @@ export const api = {
       basePrice: data.basePrice || 45000,
       demoVideoUrl: data.demoVideoUrl || '',
       demoVideoTitle: data.demoVideoTitle || (data.name ? `Démonstration : ${data.name}` : 'Démonstration vidéo'),
+      demoVideos: data.demoVideos || (data.demoVideoUrl ? [{
+        url: data.demoVideoUrl,
+        title: data.demoVideoTitle || (data.name ? `Démonstration : ${data.name}` : 'Démonstration vidéo')
+      }] : []),
       sourceFileName: data.sourceFileName || 'Application_Excel.xlsm',
       sourceFileData: data.sourceFileData,
       faqs: data.faqs || []
@@ -483,7 +492,7 @@ export const api = {
       return {
         valid: false,
         status: 'not_found',
-        message: 'Clé de licence introuvable dans la base de données APP EXCEL.'
+        message: 'Clé de licence introuvable dans la base de données GESTE APP.'
       };
     }
 
@@ -511,7 +520,7 @@ export const api = {
         return {
           valid: false,
           status: 'expired',
-          message: `Licence expirée depuis le ${lic.expiresAt}. Veuillez la renouveler sur APP EXCEL.`,
+          message: `Licence expirée depuis le ${lic.expiresAt}. Veuillez la renouveler sur GESTE APP.`,
           productName: lic.productName,
           expiresAt: lic.expiresAt
         };
@@ -658,6 +667,19 @@ export const api = {
     return u;
   },
 
+  async archiveUser(userId: string, isArchived = true): Promise<User> {
+    const target = users.find(user => user.id === userId);
+    if (!target) throw new Error('Utilisateur non trouvé');
+    if (target.role === 'super_admin') {
+      throw new Error('Impossible d’archiver le compte Super Administrateur principal.');
+    }
+
+    target.isArchived = isArchived;
+    target.archivedAt = isArchived ? new Date().toISOString() : null;
+    setStored('users', users);
+    return target;
+  },
+
   async createUser(userData: {
     name: string;
     email: string;
@@ -689,6 +711,8 @@ export const api = {
       country: userData.country || 'Togo',
       address: userData.address || 'Lomé, Togo',
       sellerStatus: normalizedRole === 'seller' ? 'approved' : undefined,
+      isArchived: false,
+      archivedAt: null,
       avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80`,
       createdAt: new Date().toISOString().split('T')[0]
     };
@@ -711,7 +735,18 @@ export const api = {
   async updateUser(userId: string, data: Partial<User>): Promise<User> {
     const idx = users.findIndex(u => u.id === userId);
     if (idx === -1) throw new Error('Utilisateur non trouvé');
-    users[idx] = { ...users[idx], ...data };
+
+    const normalizedData = { ...data } as Partial<User>;
+    if ((normalizedData.role as any) === 'vendeur') {
+      normalizedData.role = 'seller';
+    }
+
+    users[idx] = {
+      ...users[idx],
+      ...normalizedData,
+      isArchived: normalizedData.isArchived ?? users[idx].isArchived ?? false,
+      archivedAt: normalizedData.archivedAt ?? users[idx].archivedAt ?? null
+    };
     setStored('users', users);
     return users[idx];
   },
@@ -730,6 +765,18 @@ export const api = {
     p.status = 'rejected';
     setStored('products', products);
     return p;
+  },
+
+  async deleteProduct(productId: string): Promise<boolean> {
+    products = getStored('products', products);
+    const productExists = products.some(product => product.id === productId);
+    if (!productExists) {
+      throw new Error('Produit introuvable');
+    }
+
+    products = products.filter(product => product.id !== productId);
+    setStored('products', products);
+    return true;
   },
 
   async updateSettings(newSettings: Partial<PlatformSettings>): Promise<PlatformSettings> {

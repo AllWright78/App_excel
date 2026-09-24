@@ -10,7 +10,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          
+
           {/* Column 1: Brand & Presentation */}
           <div className="lg:col-span-2">
             <div
@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <span className="font-extrabold text-xl tracking-tight text-white">
-                APP <span className="text-emerald-400">EXCEL</span>
+                <span className="text-emerald-400">GESTE</span> APP
               </span>
             </div>
 
@@ -37,11 +37,11 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>contact@appexcel.tg</span>
+                <span>informatiquegrace@gmail.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+228 90 00 11 22 / +228 91 88 77 66</span>
+                <span>+228 91 59 95 78</span>
               </div>
             </div>
 
@@ -61,7 +61,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
                   Carte Bancaire
                 </span>
                 <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-md border border-slate-700">
-                  Espèces à la livraison
+                  PayPal
                 </span>
               </div>
             </div>
@@ -144,7 +144,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
               </li>
               <li>
                 <button onClick={() => navigate('about')} className="hover:text-emerald-400 transition-colors">
-                  À propos d’APP EXCEL
+                  À propos de GESTE APP
                 </button>
               </li>
               <li>
@@ -174,7 +174,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
         {/* Bottom copyright & guarantees */}
         <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-1">
-            <span>© {new Date().getFullYear()} APP EXCEL. Tous droits réservés.</span>
+            <span>© {new Date().getFullYear()} GESTE APP. Tous droits réservés.</span>
             <span className="hidden sm:inline">· Plateforme SaaS pour l'Afrique et le Monde.</span>
           </div>
 

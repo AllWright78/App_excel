@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRoute, navigate, onSearch
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
         <div className="flex items-center justify-between gap-3 sm:gap-6">
           
-          {/* Brand Logo (Matching image.png: Green icon + APP EXCEL) */}
+          {/* Brand Logo */}
           <div
             onClick={() => navigate('home')}
             className="flex items-center gap-2.5 cursor-pointer select-none group shrink-0"
@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRoute, navigate, onSearch
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-xl tracking-tight text-slate-900 leading-none group-hover:text-emerald-700 transition-colors">
-                APP <span className="text-emerald-600">EXCEL</span>
+                <span className="text-emerald-600">GESTE</span> APP
               </span>
             </div>
           </div>

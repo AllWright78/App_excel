@@ -604,7 +604,7 @@ export const INITIAL_COUPONS: Coupon[] = [
 ];
 
 export const INITIAL_SETTINGS: PlatformSettings = {
-  siteName: 'APP EXCEL',
+  siteName: 'GESTE APP',
   contactEmail: 'contact@appexcel.tg',
   contactPhone: '+228 90 00 11 22',
   currency: 'XOF',
@@ -636,7 +636,7 @@ export const INITIAL_TICKETS: Ticket[] = [
     replies: [
       {
         id: 'r-1',
-        senderName: 'Support APP EXCEL',
+        senderName: 'Support GESTE APP',
         senderRole: 'support',
         message: 'Bonjour M. Dupont. Votre clé de licence permet jusqu’à 3 postes. Vous pouvez simplement l’entrer sur le nouveau PC. Si besoin, nous pouvons réinitialiser le compteur d’activations.',
         createdAt: '2025-05-18 10:15'

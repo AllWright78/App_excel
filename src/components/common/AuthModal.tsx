@@ -36,14 +36,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   React.useEffect(() => {
     if (!isAuthModalOpen) return;
     setMode(authModalMode);
+    setLoginError(null);
     if (authModalMode === 'login') {
-      setLoginEmail('a@gmail.com');
+      setLoginEmail('');
     }
   }, [authModalMode, isAuthModalOpen]);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('a@gmail.com');
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Register form state
@@ -59,8 +61,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
+
     if (!loginEmail.trim()) {
-      addToast('Erreur', 'Veuillez renseigner votre adresse email.', 'error');
+      const message = 'Veuillez renseigner votre adresse email.';
+      setLoginError(message);
+      addToast('Erreur', message, 'error');
       return;
     }
 
@@ -68,14 +74,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
     try {
       const res = await login(loginEmail, loginPassword);
       if (res.success) {
-        addToast('Connexion réussie', 'Bienvenue sur la plateforme APP EXCEL !', 'success');
+        addToast('Connexion réussie', 'Bienvenue sur la plateforme GESTE APP !', 'success');
         if (onSuccess) onSuccess();
         closeAuthModal();
       } else {
+        setLoginError(res.message || 'Identifiants invalides.');
         addToast('Erreur d’authentification', res.message || 'Identifiants invalides.', 'error');
       }
     } catch (err: any) {
-      addToast('Erreur', err.message || 'Une erreur est survenue.', 'error');
+      const message = err.message || 'Une erreur est survenue.';
+      setLoginError(message);
+      addToast('Erreur', message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +147,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
 
           <div className="flex items-center space-x-2 text-emerald-200 text-xs font-semibold tracking-wide uppercase mb-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Portail Sécurisé APP EXCEL</span>
+            <span>Portail Sécurisé GESTE APP</span>
           </div>
 
           <h2 className="text-xl font-bold tracking-tight">
@@ -199,7 +208,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     required
                     value={loginEmail}
                     onChange={e => setLoginEmail(e.target.value)}
-                    placeholder="ex: moumouniabdoulmalik29@gmail.com"
+                    placeholder="ex: votre@email.com"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-900 focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
@@ -226,6 +235,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                   />
                 </div>
               </div>
+
+              {loginError && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                  {loginError}
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -392,7 +407,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                   className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500"
                 />
                 <label htmlFor="modal-terms" className="text-[11px] text-slate-600 leading-tight">
-                  J'accepte les Conditions Générales de Vente et la Politique de Confidentialité de la plateforme APP EXCEL.
+                  J'accepte les Conditions Générales de Vente et la Politique de Confidentialité de la plateforme GESTE APP.
                 </label>
               </div>
 

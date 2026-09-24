@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Product } from '../../types';
 import { X, Play, CheckCircle2, ShieldCheck, ShoppingCart, Sparkles, ExternalLink } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { getYoutubeEmbedUrl } from '../../utils/video';
 
 interface VideoDemoModalProps {
   product: Product | null;
@@ -19,11 +20,17 @@ export const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
 }) => {
   const { addToCart } = useCart();
   const { addToast } = useNotifications();
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
 
   if (!isOpen || !product) return null;
 
-  const videoUrl = product.demoVideoUrl || 'https://www.youtube.com/embed/S_8qM8C-Q7s';
-  const videoTitle = product.demoVideoTitle || `Démonstration en vidéo : ${product.name}`;
+  const videos = product.demoVideos?.length
+    ? product.demoVideos
+    : [{ url: product.demoVideoUrl || 'https://www.youtube.com/embed/S_8qM8C-Q7s', title: product.demoVideoTitle || '' }];
+  const selectedVideo = videos[selectedVideoIndex] || videos[0];
+  const originalVideoUrl = selectedVideo.url;
+  const videoUrl = getYoutubeEmbedUrl(originalVideoUrl);
+  const videoTitle = selectedVideo.title || `Démonstration en vidéo : ${product.name}`;
 
   const handleAddToCart = () => {
     addToCart(product, product.defaultLicense || 'annual');
@@ -72,15 +79,40 @@ export const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
         </div>
 
         {/* Video Player Frame */}
+        {videos.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto px-4 py-3 bg-slate-950 border-b border-slate-800">
+            {videos.map((video, index) => (
+              <button
+                key={`${video.url}-${index}`}
+                type="button"
+                onClick={() => setSelectedVideoIndex(index)}
+                className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold ${selectedVideoIndex === index ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+              >
+                {video.title || `Vidéo ${index + 1}`}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="relative aspect-video w-full bg-black">
-          {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
-            <iframe
-              className="w-full h-full border-0"
-              src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
-              title={videoTitle}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+          {videoUrl ? (
+            <>
+              <iframe
+                className="relative z-0 w-full h-full border-0"
+                src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
+                title={videoTitle}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fermer la vidéo"
+                title="Fermer la vidéo"
+                className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-slate-950/90 text-white shadow-lg ring-1 ring-white/30 hover:bg-rose-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-radial from-slate-800 to-slate-950">
               <div className="w-16 h-16 rounded-full bg-emerald-600/30 border border-emerald-500 text-emerald-400 flex items-center justify-center mb-4">
@@ -97,6 +129,20 @@ export const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
             </div>
           )}
         </div>
+
+        {videoUrl && (
+          <div className="px-4 pt-3 bg-slate-950 text-center">
+            <a
+              href={originalVideoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Ouvrir la vidéo sur YouTube
+            </a>
+          </div>
+        )}
 
         {/* Bottom Details & Actions */}
         <div className="p-4 sm:p-5 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -121,6 +167,13 @@ export const VideoDemoModal: React.FC<VideoDemoModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2.5 w-full sm:w-auto justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs transition-colors flex items-center space-x-1.5"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Quitter la vidéo</span>
+            </button>
             <button
               onClick={handleAddToCart}
               className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition-colors flex items-center space-x-1.5"

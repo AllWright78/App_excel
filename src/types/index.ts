@@ -48,6 +48,8 @@ export interface User {
   company?: string;
   commissionRate?: number;
   sellerStatus?: SellerStatus;
+  isArchived?: boolean;
+  archivedAt?: string | null;
   createdAt: string;
 }
 
@@ -101,6 +103,7 @@ export interface Product {
   isFeatured?: boolean;
   demoVideoUrl?: string;
   demoVideoTitle?: string;
+  demoVideos?: { url: string; title: string }[];
   sourceFileName?: string;
   sourceFileData?: string;
   faqs: { question: string; answer: string }[];

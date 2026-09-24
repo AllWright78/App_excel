@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../../types';
-import { Star, Heart, FileSpreadsheet, ShieldCheck, Play, Eye } from 'lucide-react';
+import { Star, Heart, ShieldCheck, Play, Eye } from 'lucide-react';
 import { api } from '../../services/api';
 import { useNotifications } from '../../context/NotificationContext';
 import { useCart } from '../../context/CartContext';
@@ -63,11 +63,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onO
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
         
         {/* Main Logo / Icon Showcase */}
-        <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-xl flex items-center justify-center text-white border-2 border-emerald-400/50 group-hover:scale-105 transition-transform duration-300">
-          <FileSpreadsheet className="w-10 h-10 text-emerald-50" />
-          <span className="absolute bottom-1 right-1 bg-white text-emerald-800 text-[9px] font-black px-1 rounded shadow-xs">
-            XLS
-          </span>
+        <div className="relative z-10 w-28 h-24 rounded-2xl overflow-hidden bg-white shadow-xl border-2 border-emerald-400/50 group-hover:scale-105 transition-transform duration-300">
+          <img src={product.logo} alt={product.name} className="w-full h-full object-cover" />
         </div>
 
         {/* Favorite Heart Button */}
@@ -89,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onO
         )}
 
         {/* Video Demo Button Badge */}
-        {product.demoVideoUrl && (
+        {(product.demoVideos?.length || product.demoVideoUrl) && (
           <button
             type="button"
             onClick={handleVideoClick}
@@ -97,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect, onO
             title="Regarder la démo en vidéo"
           >
             <Play className="w-3 h-3 fill-white text-white" />
-            <span>Démo vidéo</span>
+            <span>{product.demoVideos?.length ? `${product.demoVideos.length} vidéos` : 'Démo vidéo'}</span>
           </button>
         )}
       </div>

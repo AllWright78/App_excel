@@ -22,7 +22,7 @@ export class FloozPaymentGateway implements PaymentGateway {
         amount: request.amount,
         currency: request.currency,
         status: 'failed',
-        message: 'Numéro de téléphone Flooz invalide. Veuillez fournir un numéro Moov Africa valide (ex: 99 00 00 00).',
+        message: 'Numéro de téléphone Flooz invalide. Veuillez fournir un numéro Moov Africa valide (ex: 91 59 95 78).',
         timestamp: new Date().toISOString(),
         gatewayResponse: {
           errorCode: 'INVALID_MSISDN',

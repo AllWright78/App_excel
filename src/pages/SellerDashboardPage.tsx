@@ -90,6 +90,20 @@ export const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ naviga
     }
   };
 
+  const handleDeleteProduct = async (product: Product) => {
+    if (!window.confirm(`Supprimer définitivement « ${product.name} » ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      await api.deleteProduct(product.id);
+      setVendorProducts(prev => prev.filter(item => item.id !== product.id));
+      addToast('Application supprimée', 'L’application a été supprimée définitivement.', 'success');
+    } catch (error: any) {
+      addToast('Erreur', error.message || 'Impossible de supprimer cette application.', 'error');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
@@ -109,7 +123,7 @@ export const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ naviga
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Reversement vendeur : <strong>85%</strong> (Commission APP EXCEL : 15%) · Paiements Flooz & TMoney
+              Reversement vendeur : <strong>85%</strong> (Commission GESTE APP : 15%) · Paiements Flooz & TMoney & carte bancaire
             </p>
           </div>
         </div>
@@ -259,6 +273,12 @@ export const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ naviga
                         className="text-xs font-semibold text-blue-600 hover:underline"
                       >
                         Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(prod)}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                      >
+                        Supprimer
                       </button>
                     </td>
                   </tr>

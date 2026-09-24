@@ -5,6 +5,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { VideoDemoModal } from '../components/common/VideoDemoModal';
+import { getYoutubeEmbedUrl } from '../utils/video';
 import {
   ChevronRight,
   Star,
@@ -52,6 +53,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [selectedImage, setSelectedImage] = useState<string>(product.gallery[0] || product.logo);
   const [isFavorite, setIsFavorite] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const videos = product.demoVideos?.length
+    ? product.demoVideos
+    : product.demoVideoUrl
+      ? [{ url: product.demoVideoUrl, title: product.demoVideoTitle || `Démonstration : ${product.name}` }]
+      : [];
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
 
   // New review form state
   const [newRating, setNewRating] = useState(5);
@@ -142,15 +149,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="relative rounded-2xl bg-gradient-to-br from-slate-900 to-emerald-950 border border-slate-800 p-8 flex items-center justify-center min-h-[320px] shadow-lg overflow-hidden group">
             <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
             
-            <div className="relative z-10 w-28 h-28 rounded-3xl bg-emerald-600 shadow-2xl flex items-center justify-center text-white border-2 border-emerald-400/60 group-hover:scale-105 transition-transform duration-300">
-              <FileSpreadsheet className="w-16 h-16 text-emerald-50" />
-              <span className="absolute bottom-2 right-2 bg-white text-emerald-900 font-black text-xs px-1.5 py-0.5 rounded shadow">
-                XLS
-              </span>
+            <div className="relative z-10 w-48 h-40 rounded-3xl overflow-hidden bg-white shadow-2xl border-2 border-emerald-400/60 group-hover:scale-105 transition-transform duration-300">
+              <img src={selectedImage || product.logo} alt={product.name} className="w-full h-full object-cover" />
             </div>
 
             {/* Video Play Overlay */}
-            {product.demoVideoUrl && (
+            {videos.length > 0 && (
               <button
                 type="button"
                 onClick={() => setVideoModalOpen(true)}
@@ -517,14 +521,35 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         <div className="pt-6">
           {activeTab === 'video' && (
             <div className="space-y-4 max-w-4xl">
+              {videos.length > 1 && (
+                <div className="flex flex-wrap gap-2">
+                  {videos.map((video, index) => (
+                    <button
+                      key={`${video.url}-${index}`}
+                      type="button"
+                      onClick={() => setSelectedVideoIndex(index)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                        selectedVideoIndex === index
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
+                      }`}
+                    >
+                      <Play className="inline-block w-3 h-3 mr-1" />
+                      {video.title || `Vidéo ${index + 1}`}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200">
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                     <Play className="w-4 h-4 text-emerald-600 fill-emerald-600" />
-                    <span>{product.demoVideoTitle || `Démonstration guidée : ${product.name}`}</span>
+                    <span>{videos[selectedVideoIndex]?.title || `Démonstration guidée : ${product.name}`}</span>
                   </h3>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Regardez le classeur en action : saisie, automatisation VBA, tableaux de bord et édition d'états.
+                    {videos.length > 1
+                      ? `${videos.length} vidéos disponibles : choisissez la démonstration à regarder.`
+                      : "Regardez le classeur en action : saisie, automatisation VBA, tableaux de bord et édition d'états."}
                   </p>
                 </div>
                 <button
@@ -540,7 +565,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-xl">
                 <iframe
                   className="w-full h-full border-0"
-                  src={`${product.demoVideoUrl || 'https://www.youtube.com/embed/S_8qM8C-Q7s'}?rel=0&modestbranding=1`}
+                  src={`${getYoutubeEmbedUrl(videos[selectedVideoIndex]?.url || '') || 'https://www.youtube.com/embed/S_8qM8C-Q7s'}?rel=0&modestbranding=1`}
                   title={product.name}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -695,7 +720,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-slate-500">Contactez le vendeur ou le support APP EXCEL pour toute question technique.</p>
+                <p className="text-xs text-slate-500">Contactez le vendeur ou le support GESTE APP pour toute question technique.</p>
               )}
             </div>
           )}

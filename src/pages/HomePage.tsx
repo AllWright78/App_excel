@@ -44,7 +44,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
 
   useEffect(() => {
     async function loadData() {
-      const { products } = await api.getProducts({ sort: 'popular' });
+      const { products } = await api.getProducts({ sort: 'newest' });
       setPopularProducts(products.slice(0, 4));
       const cats = await api.getCategories();
       setCategories(cats);
@@ -76,49 +76,59 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
   };
 
   return (
-    <div className="space-y-16 sm:space-y-24 pb-20">
-      
+    <div className="home-page relative space-y-12 sm:space-y-16 pb-14">
+
       {/* 1. HERO SECTION (Matches Section 5 & Top-Left Mockup) */}
-      <section className="relative isolate overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24 bg-gradient-to-br from-emerald-50 via-white 55% to-sky-50/70">
+      <section className="relative isolate overflow-hidden pt-6 pb-12 md:pt-10 md:pb-16 bg-white">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-25"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=80')"
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/95 via-white/80 to-emerald-50/75"
+        />
         <div className="pointer-events-none absolute -top-32 -right-20 h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 -left-24 h-72 w-72 rounded-full bg-sky-300/15 blur-3xl" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
             {/* Left Column: Heading & Calls to Action */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-12 max-w-none space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-300 text-emerald-800 text-xs font-bold tracking-wide">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
                 <span>Marketplace Spécialisée N°1 en Afrique & Togo</span>
               </div>
 
-              <h1 className="text-balance text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.08]">
-                Vos applications professionnelles,{' '}
+              <h1 className="text-balance text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold text-slate-950 tracking-tight leading-[1.08]">
+                Optimisez votre gestion d'entreprise {' '}
                 <span className="text-emerald-600 underline decoration-emerald-300 decoration-wavy decoration-2">
                   simplement.
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl font-normal">
-                Découvrez, achetez et utilisez des solutions numériques adaptées à vos besoins.
-                Tableaux de bord Excel automatisés, logiciels de gestion de stock, comptabilité SYSCOHADA et CRM.
-              </p>
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-none font-normal">
+                Pourquoi mettre une heure à faire manuellement ce qu'un simple programme peut faire en quelques secondes? Allez faire une pause pendant que votre programme travaille tout seul, il aura terminé bien avant que vous ayez fini votre thé ! Avec la technologie, on peut travailler autrement et plus efficacement.  Quand vous donnez de bons outils à vos employés, cela change tout!              </p>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button
                   type="button"
                   onClick={() => navigate('applications')}
-                  className="px-7 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/25 hover:-translate-y-0.5 hover:shadow-xl transition-all flex items-center justify-center gap-2 group"
+                  className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 hover:-translate-y-0.5 hover:shadow-xl transition-all flex items-center justify-center gap-2 group"
                 >
-                  <span>Découvrir les applications</span>
+                  <span>Découvrir nos applications</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => navigate('dashboard')}
-                  className="px-7 py-3.5 rounded-2xl bg-white/90 hover:bg-white text-slate-800 font-semibold text-base border border-slate-200 hover:border-emerald-300 shadow-premium transition-all flex items-center justify-center"
+                  className="px-6 py-3 rounded-xl bg-white/90 hover:bg-white text-slate-800 font-semibold text-sm border border-slate-200 hover:border-emerald-300 shadow-premium transition-all flex items-center justify-center"
                 >
                   Créer un compte
                 </button>
@@ -128,92 +138,11 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
               <div className="pt-4 flex items-center gap-6 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Livraison numérique instantanée</span>
+                  <span>Livraison numérique instantanée par email</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Flooz & TMoney acceptés</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Visual Mockup Showcase (Excel dashboard screen preview) */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                {/* Glow backdrop */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl opacity-20 blur-2xl -z-10"></div>
-
-                {/* Main Software Card Interface Mockup */}
-                <div className="bg-slate-950/95 rounded-[2rem] border border-white/10 shadow-premium overflow-hidden text-white p-5 space-y-4 backdrop-blur-sm">
-                  
-                  {/* Window Bar */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                      <span className="text-xs text-slate-400 font-mono ml-2">Gestion_de_Stock_Pro_v2.1.xlsm</span>
-                    </div>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono">
-                      LICENCE ACTIVE
-                    </span>
-                  </div>
-
-                  {/* Mockup Dashboard Header */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-slate-400">TABLEAU DE BORD EXCEL</p>
-                      <h4 className="text-base font-bold text-white">Stock Général & Valorisation</h4>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-black text-xl shadow-md">
-                      X
-                    </div>
-                  </div>
-
-                  {/* Mockup KPI Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/60">
-                      <p className="text-[10px] text-slate-400">Valeur totale du stock</p>
-                      <p className="text-base font-extrabold text-emerald-400 mt-0.5">24 850 000 FCFA</p>
-                      <span className="text-[10px] text-emerald-300 font-semibold">+14.2% ce mois</span>
-                    </div>
-                    <div className="bg-slate-800/90 rounded-xl p-3 border border-slate-700/60">
-                      <p className="text-[10px] text-slate-400">Articles en rupture</p>
-                      <p className="text-base font-extrabold text-amber-400 mt-0.5">3 Références</p>
-                      <span className="text-[10px] text-amber-300 font-semibold">Alerte automatique</span>
-                    </div>
-                  </div>
-
-                  {/* Simulated Chart Bars */}
-                  <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                    <div className="flex justify-between text-[11px] text-slate-400 mb-2">
-                      <span>Flux d'entrées / sorties</span>
-                      <span className="text-emerald-400">Automatisé VBA</span>
-                    </div>
-                    <div className="flex items-end gap-2 h-20 pt-2">
-                      <div className="flex-1 bg-slate-700 hover:bg-emerald-600 rounded-t h-[45%] transition-all"></div>
-                      <div className="flex-1 bg-slate-700 hover:bg-emerald-600 rounded-t h-[70%] transition-all"></div>
-                      <div className="flex-1 bg-emerald-500 rounded-t h-[95%]"></div>
-                      <div className="flex-1 bg-slate-700 hover:bg-emerald-600 rounded-t h-[60%] transition-all"></div>
-                      <div className="flex-1 bg-emerald-500 rounded-t h-[80%]"></div>
-                      <div className="flex-1 bg-slate-700 hover:bg-emerald-600 rounded-t h-[75%] transition-all"></div>
-                      <div className="flex-1 bg-emerald-500 rounded-t h-[100%]"></div>
-                    </div>
-                  </div>
-
-                  {/* Live Floating Badge */}
-                  <div className="bg-emerald-950/80 border border-emerald-500/40 rounded-xl p-3 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <KeyRound className="w-4 h-4 text-emerald-400" />
-                      <div>
-                        <p className="font-bold text-white text-xs">Clé: EXCEL-STK-7789-2025</p>
-                        <p className="text-[10px] text-slate-400">Validée · Clôture annuelle incluse</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/60 px-2 py-0.5 rounded">
-                      Vérifié
-                    </span>
-                  </div>
+                  <span>Tous moyens de paiement acceptés</span>
                 </div>
               </div>
             </div>
@@ -223,9 +152,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       </section>
 
       {/* 2. VALUE PROPOSITIONS (5 Badges from Section 5 & Mockup) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          
+
           <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
@@ -280,7 +209,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       </section>
 
       {/* 3. APPLICATIONS POPULAIRES (Section 5 & Mockup Cards) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -315,7 +244,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       </section>
 
       {/* 4. CATÉGORIES POPULAIRES (Section 5) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Catégories populaires
@@ -346,14 +275,14 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
         </div>
       </section>
 
-      {/* 5. POURQUOI APP EXCEL ? (Section 5) */}
+      {/* 5. POURQUOI GESTE APP ? */}
       <section className="bg-slate-900 text-white py-16 rounded-3xl mx-4 sm:mx-6 lg:mx-8 px-6 sm:px-12">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
             Fiabilité & Technologie
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold mt-2">
-            Pourquoi choisir APP EXCEL ?
+            Pourquoi choisir GESTE APP ?
           </h2>
           <p className="text-slate-400 text-sm mt-3 leading-relaxed">
             Une plateforme pensée pour les professionnels africains et mondiaux, alliant simplicité d'Excel et puissance des licences logicielles.
@@ -394,7 +323,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       </section>
 
       {/* 6. COMMENT ÇA MARCHE ? (Section 5: 5 étapes) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
             Parcours simple & rapide
@@ -428,9 +357,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
 
       {/* 7. NOS CHIFFRES (Section 5: Chiffres dynamiques) */}
       <section className="bg-emerald-700 text-white py-14 rounded-3xl mx-4 sm:mx-6 lg:mx-8 px-6">
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="max-w-6xl mx-auto text-center">
           <h3 className="text-xl sm:text-2xl font-extrabold mb-10">
-            APP EXCEL en quelques chiffres
+            GESTE APP en quelques chiffres
           </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
@@ -463,21 +392,21 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate, onSelectProduct })
       </section>
 
       {/* 8. BOTTOM CALL TO ACTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-slate-900 to-emerald-950 rounded-3xl p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 border border-emerald-900/50 shadow-xl">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-slate-900 to-emerald-950 rounded-3xl p-7 sm:p-9 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-900/50 shadow-xl">
           <div className="space-y-3 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-extrabold">
+            <h3 className="text-xl sm:text-2xl font-extrabold">
               Vous êtes créateur de solutions Excel ou logiciels ?
             </h3>
             <p className="text-slate-300 text-sm max-w-xl">
-              Rejoignez le réseau de vendeurs APP EXCEL, monétisez vos fichiers et applications automatisées auprès de milliers de clients.
+              Rejoignez le réseau de vendeurs GESTE APP, monétisez vos fichiers et applications automatisées auprès de milliers de clients.
             </p>
           </div>
           <button
             onClick={() => navigate('become-seller')}
             className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-sm shadow-md transition-all shrink-0"
           >
-            Devenir vendeur sur APP EXCEL
+            Devenir vendeur sur GESTE APP
           </button>
         </div>
       </section>

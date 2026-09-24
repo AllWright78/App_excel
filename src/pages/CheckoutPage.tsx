@@ -124,7 +124,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ navigate, onOrderCom
           city: customerCity
         },
         paymentMethod,
-        description: `Achat APP EXCEL - Commande ${orderNumber}`,
+        description: `Achat GESTE APP - Commande ${orderNumber}`,
         paymentDetails: {
           phoneNumber: mobileMoneyNumber || customerPhone,
           cardNumber,

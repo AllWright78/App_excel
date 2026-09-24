@@ -40,7 +40,7 @@ export const ClientDashboardPage: React.FC<ClientDashboardPageProps> = ({ naviga
   const [messagesList, setMessagesList] = useState([
     {
       id: 'msg-1',
-      sender: 'Support APP EXCEL',
+      sender: 'Support GESTE APP',
       time: 'Hier à 15:20',
       text: 'Bonjour Jean, votre licence pour CRM Entreprise a bien été activée. Avez-vous besoin d’aide pour la synchronisation des colonnes ?',
       isStaff: true

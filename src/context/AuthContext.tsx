@@ -32,7 +32,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('app_excel_current_user');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const savedUser = JSON.parse(saved) as User;
+        return savedUser.role === 'super_admin'
+          ? { ...savedUser, name: 'Moumouni Abdoul Malik', email: 'moumouniabdoulmalik29@gmail.com' }
+          : savedUser;
       } catch {
         return null;
       }
@@ -69,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     const allUsers = await api.getAllUsers();
-    const found = allUsers.find(u => u.role === userRole);
+    const found = allUsers.find(u => u.role === userRole && !u.isArchived);
     if (found) {
       setUser(found);
     } else {
@@ -83,20 +86,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password?: string): Promise<{ success: boolean; message?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
     const allUsers = await api.getAllUsers();
+    const superAdminEmails = new Set(['moumouniabdoulmalik29@gmail.com']);
 
     // Check super admin credentials
-    if (cleanEmail === 'moumouniabdoulmalik29@gmail.com') {
+    if (superAdminEmails.has(cleanEmail)) {
+      const superAdmin = allUsers.find(u => u.email.toLowerCase() === cleanEmail) ||
+        allUsers.find(u => u.role === 'super_admin') ||
+        INITIAL_USERS[0];
+      if (superAdmin?.isArchived) {
+        return { success: false, message: 'Ce compte Super Administrateur a été archivé. Contactez un autre administrateur.' };
+      }
       if (password && password !== 'Abdoul123@') {
         return { success: false, message: 'Mot de passe incorrect pour le Super Administrateur.' };
       }
-      const adminUser = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS[0];
-      setUser({ ...adminUser, role: 'super_admin' });
+      const adminUser = superAdmin || INITIAL_USERS[0];
+      setUser({ ...adminUser, email: 'moumouniabdoulmalik29@gmail.com', role: 'super_admin' });
       closeAuthModal();
       return { success: true };
     }
 
     const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail);
     if (found) {
+      if (found.isArchived) {
+        return { success: false, message: 'Ce compte a été archivé. Impossible de se connecter.' };
+      }
       if (password && found.password && found.password !== password) {
         return { success: false, message: 'Mot de passe incorrect. Veuillez vérifier votre saisie.' };
       }

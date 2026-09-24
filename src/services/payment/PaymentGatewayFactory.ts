@@ -25,7 +25,7 @@ class BankTransferPaymentGateway implements PaymentGateway {
       gatewayResponse: {
         rib: 'TG024 01001 001234567890 45',
         bank: 'Ecobank Togo SA',
-        beneficiary: 'APP EXCEL INTERNATIONAL',
+        beneficiary: 'GESTE APP INTERNATIONAL',
         swift: 'ECOCTGXXXX'
       }
     };
